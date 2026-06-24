@@ -195,7 +195,7 @@ if __name__ == "__main__":
     flag_conv = False
     flag_conv2 = False
     total_time = 0
-    pdb.set_trace()
+    # pdb.set_trace()
     with imageio.get_writer('Controlled_alpha.gif', mode='I', fps=10) as writer:
         while total_time < 0.8:
 
@@ -262,12 +262,12 @@ if __name__ == "__main__":
                 if not flag_conv2:
                     # apply potential field
                     print('ready to update agent2')
-                    if total_time == 0.03:
-                        pdb.set_trace()
-                    elif total_time >= 0.3 and total_time <= 0.32:
-                        pdb.set_trace()
-                    elif total_time >= 0.6 and total_time <= 0.62:
-                        pdb.set_trace()
+                    # if total_time == 0.03:
+                    #     pdb.set_trace()
+                    # elif total_time >= 0.3 and total_time <= 0.32:
+                    #     pdb.set_trace()
+                    # elif total_time >= 0.6 and total_time <= 0.62:
+                    #     pdb.set_trace()
 
                     r_s = 0.2
                     distance = np.linalg.norm(gamma_tra[-1] - gamma2_tra[-1])
