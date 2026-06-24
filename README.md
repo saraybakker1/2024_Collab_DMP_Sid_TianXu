@@ -6,6 +6,10 @@ We introduce a  new method that utilizes collaborative DMP approach to generate 
 
 [Follow this link for the project website.](https://sites.google.com/virginia.edu/oncoldmp/home)
 
+## NOTES BY SARAY:
+DualArm_DMP_PyB_v7_stat.py: used to generate "without proposed ONCol-DMP" in Fig. 4 of the paper.
+DualArm_DMP_PyB_v7_stat_.py:  used to generate "with proposed ONCol-DMP" in Fig. 4 of the paper. 
+
 ## Prerequisites
 
 Before proceeding with the installation, ensure you have the following installed:
