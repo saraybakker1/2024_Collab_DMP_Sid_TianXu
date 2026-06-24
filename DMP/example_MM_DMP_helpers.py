@@ -1,18 +1,19 @@
 from scipy.spatial.transform import Rotation as R
 import numpy as np
-from GlobalPose import getlink_global_pose, get_semiaxes_Constants
+from GlobalPoseDinova import getlink_global_pose, get_semiaxes_Constants
 from DMP_map_Rotation import rotation_matrix_from_vectors, tra_map_param, tra_map_forward, tra_map_inverse
 from example_MM_DMP_helpers_plot import *
 
 # Get global pose of each link
-def getLinkFeatures(robot):
+def getLinkFeatures(robot, nr_links=9):
     Link_gloablpos = {}
     Link_globalvel = {}
     Link_globalrot = {}
     Link_axes = {}
 
-    for l in range(1, 8): #todo
-        if l < 7:
+    for l in robot.used_links:
+    # for l in range(1, nr_links): #todo
+        if l < robot.used_links[-2]:
             LinkState = robot._getLinkState(l)[0:2]
             Pos = LinkState[0]
             Ori = R.from_quat(LinkState[1])
@@ -72,9 +73,11 @@ def perturb_dynamic_agent2(x, v, Ellipsoid_dict_agent1, num_links, R2, rotm_agen
 def Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2,
                      T1, T2, R1, R2,
                      Ellipsoid_dict_agent1, Ellipsoid_dict_agent2,
-                     num_links):
+                     num_links, used_links=None):
+    if used_links is None:
+        used_links = range(1, num_links + 1)
     print('Arm Info Update')
-    for i in range(1, num_links + 1):
+    for i in used_links:
         key = f"link{i}"
 
         # center_map=cent_agent1[f"link{i}"]

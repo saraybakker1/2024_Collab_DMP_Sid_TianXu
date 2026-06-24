@@ -35,7 +35,7 @@ class UR5_Robotiq(RobotBase):
     self.gripper_open_force = [30] * 2
     # self.end_effector_index = 12
     self.end_effector_index = 12
-
+    self.used_links = [1, 2, 3, 4, 5, 6, 7, 8]
     self.home_positions = [0., 0., -2.137, 1.432, -0.915, -1.591, 0.071, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
     self.home_positions_joint = self.home_positions[1:7]
 

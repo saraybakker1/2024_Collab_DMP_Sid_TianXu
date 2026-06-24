@@ -545,7 +545,7 @@ if __name__=="__main__":
         axes_map=alpha1 * axes_map
         Ellipsoid_dict_agent2[f"link{i}"]=sq_stat(center=center_map, axis=axes_map+axes_safe, coeffs=np.array([1,1,1]), A=A, eta=eta)
 
-    Update_link_Data(cent_agent1, cent_agent2)
+    Update_link_Data(cent_agent1, cent_agent2) #, alpha1, alpha2, T1, T2, R1, R2)
 
     plt.ion()
 
@@ -561,7 +561,7 @@ if __name__=="__main__":
     flag_conv = False
     flag_conv2 = False
     total_time=0
-    pdb.set_trace()
+    # pdb.set_trace()
     with imageio.get_writer('Controlled_alpha.gif', mode='I', fps=10) as writer:
         while total_time < 0.8:
 
@@ -623,6 +623,9 @@ if __name__=="__main__":
 
                     meas1 = tra_map_forward(np.array(l[0]),alpha1, T1, R1)
                     flag_conv = np.linalg.norm(meas1 - MP.x_goal) < 0.05
+                    print("flag_conv: ", flag_conv)
+                    print("meas1: ", meas1)
+                    print("Mp.xgoal: ", MP.x_goal)
                 
                     print(np.linalg.norm(meas1- MP.x_goal))
 
@@ -630,7 +633,7 @@ if __name__=="__main__":
 
                     cent_agent1, axes_agent1,velo_agent1,rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2,velo_agent2,rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2)
+                    Update_link_Data(cent_agent1, cent_agent2) #, alpha1, alpha2, T1, T2, R1, R2)
 
                     # plot3d_2(data_dict_agent1[key])
 
@@ -657,12 +660,12 @@ if __name__=="__main__":
                 if not flag_conv2:
                     # apply potential field
                     print('ready to update agent2')
-                    if total_time == 0.03:
-                        pdb.set_trace()
-                    elif total_time >= 0.3 and total_time <= 0.32:
-                        pdb.set_trace()
-                    elif total_time >= 0.6 and total_time <= 0.62:
-                        pdb.set_trace()
+                    # if total_time == 0.03:
+                    #     pdb.set_trace()
+                    # elif total_time >= 0.3 and total_time <= 0.32:
+                    #     pdb.set_trace()
+                    # elif total_time >= 0.6 and total_time <= 0.62:
+                    #     pdb.set_trace()
 
                     r_s = 0.2
                     distance = np.linalg.norm(gamma_tra[-1] - gamma2_tra[-1])
@@ -704,7 +707,7 @@ if __name__=="__main__":
 
                     cent_agent1, axes_agent1,velo_agent1,rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2,velo_agent2,rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2)
+                    Update_link_Data(cent_agent1, cent_agent2) #, alpha1, alpha2, T1, T2, R1, R2)
 
                 time.sleep(0.01)
 

@@ -37,11 +37,12 @@ num_links = 9
 # Potential Field Dictionary
 Ellipsoid_dict_agent1 = {}
 Ellipsoid_dict_agent2 = {}
+used_links = [1, 2, 3, 13, 14, 15, 16, 17, 18]
 
 # define potential field
 def perturb_dynamic_agent1(x, v):
     out = 0
-    for i in range(1, num_links + 1):
+    for i in used_links:
         key = f'link{i}'
         # out+=Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, v-alpha1*R1@velo_agent2[key], R1@rotm_agent2[key])
         out += Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, R1 @ rotm_agent2[key])
@@ -51,7 +52,7 @@ def perturb_dynamic_agent1(x, v):
 
 def perturb_dynamic_agent2(x, v):
     out = 0
-    for i in range(1, num_links + 1):
+    for i in used_links:
         key = f'link{i}'
         # out+=Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, v-alpha2*R2@velo_agent1[key], R2@rotm_agent1[key])
         out += Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, R2 @ rotm_agent1[key])
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     robot2 = Dinova()
 
     robot1.initialize(base_pos=[0.0, 0.2, 0.0], base_ori=[0, 0, 0, 1])
-    robot2.initialize(base_pos=[0.65, 0.2, 0.0], base_ori=[0, 0, 0.707, 0.707])
+    robot2.initialize(base_pos=[0.65, 0.2, 0.0], base_ori=[0, 0, 0, 1])
 
     pb.setTimeStep(1 / 100)
 
@@ -86,10 +87,14 @@ if __name__ == "__main__":
     '''
     Line Trajectory
     '''
-    start1 = robot1._getLinkState(robot1.end_effector_index)[0]
-    end2 = [0.0, 0.5, 0.2]
-    start2 = robot2._getLinkState(robot2.end_effector_index)[0]
-    end1 = [0.5, 0.5, 0.2]
+    pb_state_start1 = robot1._getLinkState(robot1.end_effector_index)
+    start1 = pb_state_start1[0]
+    startorientation1 =  pb_state_start1[1] #todo: these orientations are very different from the ones computed with ds_collaboration, could be because of links, but maybe check.
+    end2 = [0.0, 1.5, 0.2]
+    pb_state_start2 = robot2._getLinkState(robot2.end_effector_index)
+    start2 = pb_state_start2[0]
+    startorientation2 = pb_state_start2[1]
+    end1 = [0.5, -0.5, 0.2]
 
     print('start1', start1)
     print('start2', start2)
@@ -165,7 +170,7 @@ if __name__ == "__main__":
     cent_agent1, axes_agent1, velo_agent1, rotm_agent1 = getLinkFeatures(robot1)
     cent_agent2, axes_agent2, velo_agent2, rotm_agent2 = getLinkFeatures(robot2)
 
-    for i in range(1, num_links + 1):
+    for i in robot1.used_links:
         center_map = cent_agent1[f"link{i}"]
         center_map = tra_map_forward(center_map, alpha2, T2, R2)
         axes_map = axes_agent1[f"link{i}"]
@@ -180,7 +185,8 @@ if __name__ == "__main__":
         Ellipsoid_dict_agent2[f"link{i}"] = sq_stat(center=center_map, axis=axes_map + axes_safe,
                                                     coeffs=np.array([1, 1, 1]), A=A, eta=eta)
 
-    Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+    Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2,
+                                                                    R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
     plt.ion()
 
@@ -198,14 +204,16 @@ if __name__ == "__main__":
     total_time = 0
     # pdb.set_trace()
     with imageio.get_writer('Controlled_alpha.gif', mode='I', fps=10) as writer:
-        while total_time < 0.8:
+        while total_time < 10.8:
 
             '''
             TODO: Change while loop condition.
             '''
-            while not (flag_conv and flag_conv2):
+            while total_time < 10.8:
+            # while not (flag_conv and flag_conv2):
                 # obst_dynamic.center=obst_dynamic.center+v_e*dt
                 total_time += dt
+                print("total_time: ", total_time)
 
                 # close_flag= np.linalg.norm(MP.x - MP2.x)>0.2
                 close_flag = True
@@ -227,7 +235,7 @@ if __name__ == "__main__":
                     # store trajecory in world map
                     gamma_tra = np.append(gamma_tra, np.array([center_agent1_origin]), axis=0)
                     position_ee = gamma_tra[-1, :]
-                    rotation_ee = [0, 0, 0.707, 0.707]
+                    rotation_ee = startorientation1       #todo
                     # rotation_ee = [0.707,0,0,0.707]
                     joint_angle = robot1._calculateIK(position_ee, rotation_ee)
                     # robot1._sendPositionCommand(joint_angle)
@@ -255,7 +263,7 @@ if __name__ == "__main__":
 
                     cent_agent1, axes_agent1, velo_agent1, rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2, velo_agent2, rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
                     for i in range(1, num_links + 1):
                         key = f'link{i}'
@@ -283,7 +291,7 @@ if __name__ == "__main__":
                     # store trajecory in world map
                     gamma2_tra = np.append(gamma2_tra, np.array([center_agent2_origin]), axis=0)
                     position_ee = gamma2_tra[-1, :]
-                    rotation_ee = [0, 0, 0.707, 0.707]
+                    rotation_ee = startorientation2
                     # rotation_ee = [0.707,0,0,0.707]
                     joint_angle = robot2._calculateIK(position_ee, rotation_ee)
                     # robot2._sendPositionCommand(joint_angle)
@@ -310,7 +318,7 @@ if __name__ == "__main__":
 
                     cent_agent1, axes_agent1, velo_agent1, rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2, velo_agent2, rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
                 time.sleep(0.01)
 

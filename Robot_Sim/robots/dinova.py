@@ -37,6 +37,7 @@ class Dinova(RobotBase):
     # self.end_effector_index = 12
     # self.home_positions = [world, x, y, theta, 4, 5, 6, 7, 8, 9, 10, 11, 12, arm_joint_1 - arm_joint6] #total: 25
     self.home_positions = [0.]*26
+    self.used_links = [1, 2, 3, 13, 14, 15, 16, 17, 18]
     self.home_positions[1:3] = [0., 0.,  0.]
     self.home_positions[13:13+6] = [0., -0.2792,  1.308,  0.,  -1.047, 0.]
     # self.home_positions = [0., 0., 0., 0., -0.2792,  1.308,  0.,  -1.047, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]
