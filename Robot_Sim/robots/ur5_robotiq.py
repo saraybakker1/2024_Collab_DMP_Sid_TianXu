@@ -26,6 +26,7 @@ class UR5_Robotiq(RobotBase):
   '''
   def __init__(self):
     super(UR5_Robotiq, self).__init__()
+    self.robot_name = "UR5"
     # Setup arm and gripper variables
     self.max_forces = [150, 150, 150, 28, 28, 28, 30, 30]
     # self.max_forces = [50, 50, 30, 10, 10, 10, 10, 10]

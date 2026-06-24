@@ -11,7 +11,7 @@ def getLinkFeatures(robot):
     Link_globalrot = {}
     Link_axes = {}
 
-    for l in range(1, 8):
+    for l in range(1, 8): #todo
         if l < 7:
             LinkState = robot._getLinkState(l)[0:2]
             Pos = LinkState[0]
@@ -22,7 +22,7 @@ def getLinkFeatures(robot):
             Link_axes[f"link{l}"] = np.array(semi_axes_cons)
             Link_globalrot[f"link{l}"] = np.array(Rotatation_matrix).T
             Link_globalvel[f"link{l}"] = np.array(robot._getLinkState(l)[6])
-        else:
+        elif robot.robot_name == "UR5":
             l = 10
             LinkState = robot._getLinkState(l)[0:2]
             Pos = LinkState[0]
@@ -33,7 +33,16 @@ def getLinkFeatures(robot):
             Link_axes[f"link7"] = np.array(semi_axes_cons)
             Link_globalrot[f"link7"] = np.array(Rotatation_matrix).T
             Link_globalvel[f"link7"] = np.array(robot._getLinkState(l)[6])
-
+        elif robot.robot_name == "dinova":
+            LinkState = robot._getLinkState(l)[0:2]
+            Pos = LinkState[0]
+            Ori = R.from_quat(LinkState[1])
+            Rotatation_matrix = Ori.as_matrix()
+            semi_axes_cons = get_semiaxes_Constants(f"link{l}")
+            Link_gloablpos[f"link{l}"] = np.array(Pos)
+            Link_axes[f"link{l}"] = np.array(semi_axes_cons)
+            Link_globalrot[f"link{l}"] = np.array(Rotatation_matrix).T
+            Link_globalvel[f"link{l}"] = np.array(robot._getLinkState(l)[6])
     return Link_gloablpos, Link_axes, Link_globalvel, Link_globalrot
 
 

@@ -28,10 +28,11 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from Robot_Sim.robots.ur5_robotiq import UR5_Robotiq
+# from Robot_Sim.robots.ur5_robotiq import UR5_Robotiq
+from Robot_Sim.robots.dinova import Dinova
 
 # number of links
-num_links = 7
+num_links = 9
 
 # Potential Field Dictionary
 Ellipsoid_dict_agent1 = {}
@@ -69,8 +70,8 @@ if __name__ == "__main__":
     Load Robots
     '''
 
-    robot1 = UR5_Robotiq()
-    robot2 = UR5_Robotiq()
+    robot1 = Dinova()
+    robot2 = Dinova()
 
     robot1.initialize(base_pos=[0.0, 0.2, 0.0], base_ori=[0, 0, 0, 1])
     robot2.initialize(base_pos=[0.65, 0.2, 0.0], base_ori=[0, 0, 0.707, 0.707])
