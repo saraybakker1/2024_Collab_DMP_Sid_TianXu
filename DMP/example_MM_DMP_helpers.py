@@ -1,7 +1,78 @@
 from scipy.spatial.transform import Rotation as R
 import numpy as np
+from dmp.dmp import DMPs_cartesian
+from dmp.dmp_ import DMPs_cartesian_
 from DMP_map_Rotation import rotation_matrix_from_vectors, tra_map_param, tra_map_forward, tra_map_inverse
 from example_MM_DMP_helpers_plot import *
+
+class DMP_Coll():
+    def __init__(self, start1, end1, start2, end2):
+        t_des = np.linspace(0.0, 1.0, 1000)
+
+        gamma = np.array([np.linspace(start1[i], end1[i], len(t_des)) for i in range(3)]).T
+        gamma2 = np.array([np.linspace(start2[i], end2[i], len(t_des)) for i in range(3)]).T
+
+        alpha1, T1, R1 = tra_map_param(gamma)
+        gamma_map = tra_map_forward(gamma, alpha1, T1, R1)
+
+        alpha2, T2, R2 = tra_map_param(gamma2)
+        gamma2_map = tra_map_forward(gamma2, alpha2, T2, R2)
+
+        # DMP Ini
+        K = 1050.0
+        alpha_s = 4.0
+        tol = 0.01
+
+        MP = DMPs_cartesian(K=K, alpha_s=alpha_s, tol=tol)
+        MP2 = DMPs_cartesian_(K=K, alpha_s=alpha_s, tol=tol)
+
+        MP.imitate_path(t_des=t_des, x_des=gamma_map)
+        MP2.imitate_path(t_des=t_des, x_des=gamma2_map)
+
+        gamma_, _, _, _ = MP.rollout()
+        gamma2_, _, _, _ = MP2.rollout()
+        t_des_ = np.linspace(0.0, 1.0, np.shape(gamma)[0])
+
+        # print(gamma_[0], gamma_[-1])
+        # print(gamma2_[0], gamma2_[-1])
+        # pdb.set_trace()
+
+        # Plot Ellipsoid (Need to be modified for better plot)
+        # Define the ellipsoid parameters
+        a = 0.2  # Semi-axis length in the x-direction
+        b = 0.1  # Semi-axis length in the y-direction
+        c = 0.15  # Semi-axis length in the z-direction
+
+        # Create a grid of values for theta and phi
+        theta = np.linspace(0, 2 * np.pi, 20)
+        phi = np.linspace(0, np.pi, 10)
+        theta, phi = np.meshgrid(theta, phi)
+
+        # Parametric equations for the ellipsoid
+        x = a * np.sin(phi) * np.cos(theta) + 0.0
+        y = b * np.sin(phi) * np.sin(theta) + 1.0
+        z = c * np.cos(phi) + 0.25
+
+        MP.x_0 = gamma_[0]
+        MP.x_goal = gamma_[-1]
+
+        MP2.x_0 = gamma2_[0]
+        MP2.x_goal = gamma2_[-1]
+
+        MP.reset_state()
+        MP2.reset_state()
+
+        self.MP = MP
+        self.MP2 = MP2
+        self.alpha1 = alpha1
+        self.T1 = T1
+        self.R1 = R1
+        self.alpha2 = alpha2
+        self.T2 = T2
+        self.R2 = R2
+        self.gamma = gamma
+        self.gamma2 = gamma2
+
 
 # Get global pose of each link
 def getLinkFeatures(robot, nr_links=9):

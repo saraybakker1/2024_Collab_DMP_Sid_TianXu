@@ -5,12 +5,9 @@ from scipy.spatial.transform import Rotation as R
 
 from io import BytesIO
 import imageio
-
-from dmp.dmp import DMPs_cartesian
-from dmp.dmp_ import DMPs_cartesian_
 # from dmp.obstacle_superquadric import Obstacle_Dynamic as sq_dyn
 from dmp.obstacle_superquadric import Obstacle_Static as sq_stat
-from example_MM_DMP_helpers import getLinkFeatures, gen_3d_plot2, Update_link_Data
+from example_MM_DMP_helpers import getLinkFeatures, gen_3d_plot2, Update_link_Data, DMP_Coll
 from DMP_map_Rotation import rotation_matrix_from_vectors, tra_map_param, tra_map_forward, tra_map_inverse
 from Minimal_Ellipsoid import rotate_ellipsoid, draw_ellipsoid, find_minimum_volume_ellipsoid, plot_ellipsoid_and_points
 from GlobalPose import getlink_global_pose, get_semiaxes_Constants
@@ -39,27 +36,6 @@ Ellipsoid_dict_agent1 = {}
 Ellipsoid_dict_agent2 = {}
 used_links = [1, 2, 3, 13, 14, 15, 16, 17, 18]
 
-# define potential field
-def perturb_dynamic_agent1(x, v):
-    out = 0
-    for i in used_links:
-        key = f'link{i}'
-        # out+=Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, v-alpha1*R1@velo_agent2[key], R1@rotm_agent2[key])
-        out += Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, R1 @ rotm_agent2[key])
-    # print("Perturbance 1", out)
-    return out
-
-
-def perturb_dynamic_agent2(x, v):
-    out = 0
-    for i in used_links:
-        key = f'link{i}'
-        # out+=Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, v-alpha2*R2@velo_agent1[key], R2@rotm_agent1[key])
-        out += Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, R2 @ rotm_agent1[key])
-        # print('local',key, Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, v-alpha2*R2@velo_agent1[key], R2@rotm_agent1[key]))
-    # print("Perturbance 2", out)
-    return out
-
 if __name__ == "__main__":
     pb.connect(pb.GUI)
     # pb.connect(pb.DIRECT)
@@ -82,8 +58,6 @@ if __name__ == "__main__":
     # Trajectory 2
     # Trajectory
 
-    t_des = np.linspace(0.0, 1.0, 1000)
-
     '''
     Line Trajectory
     '''
@@ -95,6 +69,7 @@ if __name__ == "__main__":
     start2 = pb_state_start2[0]
     startorientation2 = pb_state_start2[1]
     end2 = [0.5, -0.5, start2[-1]]
+    dt = 0.01
 
     visual_shape_id = pb.createVisualShape(
         shapeType=pb.GEOM_SPHERE,
@@ -117,61 +92,33 @@ if __name__ == "__main__":
     print('start1', start1)
     print('start2', start2)
 
-    gamma = np.array([np.linspace(start1[i], end1[i], len(t_des)) for i in range(3)]).T
-    gamma2 = np.array([np.linspace(start2[i], end2[i], len(t_des)) for i in range(3)]).T
+    dmp_c = DMP_Coll(start1, end1, start2, end2)
+    R1 = dmp_c.R1
+    R2 = dmp_c.R2
 
-    alpha1, T1, R1 = tra_map_param(gamma)
-    gamma_map = tra_map_forward(gamma, alpha1, T1, R1)
+    # define potential field
+    def perturb_dynamic_agent1(x, v):
+        out = 0
+        for i in used_links:
+            key = f'link{i}'
+            # out+=Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, v-alpha1*R1@velo_agent2[key], R1@rotm_agent2[key])
+            out += Ellipsoid_dict_agent2[key].gen_external_force_rotate(x, R1 @ rotm_agent2[key])  # todo
+        # print("Perturbance 1", out)
+        return out
 
-    alpha2, T2, R2 = tra_map_param(gamma2)
-    gamma2_map = tra_map_forward(gamma2, alpha2, T2, R2)
 
-    # DMP Ini
-    K = 1050.0
-    alpha_s = 4.0
-    tol = 0.01
-    dt = 0.01
+    def perturb_dynamic_agent2(x, v):
+        out = 0
+        for i in used_links:
+            key = f'link{i}'
+            # out+=Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, v-alpha2*R2@velo_agent1[key], R2@rotm_agent1[key])
+            out += Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, R2 @ rotm_agent1[key])
+            # print('local',key, Ellipsoid_dict_agent1[key].gen_external_force_rotate(x, v-alpha2*R2@velo_agent1[key], R2@rotm_agent1[key]))
+        # print("Perturbance 2", out)
+        return out
 
-    MP = DMPs_cartesian(K=K, alpha_s=alpha_s, tol=tol)
-    MP2 = DMPs_cartesian_(K=K, alpha_s=alpha_s, tol=tol)
-
-    MP.imitate_path(t_des=t_des, x_des=gamma_map)
-    MP2.imitate_path(t_des=t_des, x_des=gamma2_map)
-
-    gamma_, _, _, _ = MP.rollout()
-    gamma2_, _, _, _ = MP2.rollout()
-    t_des_ = np.linspace(0.0, 1.0, np.shape(gamma)[0])
-
-    # print(gamma_[0], gamma_[-1])
-    # print(gamma2_[0], gamma2_[-1])
-    # pdb.set_trace()
-
-    # Plot Ellipsoid (Need to be modified for better plot)
-    # Define the ellipsoid parameters
-    a = 0.2  # Semi-axis length in the x-direction
-    b = 0.1  # Semi-axis length in the y-direction
-    c = 0.15  # Semi-axis length in the z-direction
-
-    # Create a grid of values for theta and phi
-    theta = np.linspace(0, 2 * np.pi, 20)
-    phi = np.linspace(0, np.pi, 10)
-    theta, phi = np.meshgrid(theta, phi)
-
-    # Parametric equations for the ellipsoid
-    x = a * np.sin(phi) * np.cos(theta) + 0.0
-    y = b * np.sin(phi) * np.sin(theta) + 1.0
-    z = c * np.cos(phi) + 0.25
-
-    MP.x_0 = gamma_[0]
-    MP.x_goal = gamma_[-1]
-
-    MP2.x_0 = gamma2_[0]
-    MP2.x_goal = gamma2_[-1]
-
-    MP.reset_state()
-    MP2.reset_state()
-    gamma_tra = np.array([gamma[0]])
-    gamma2_tra = np.array([gamma2[0]])
+    gamma_tra = np.array([start1])
+    gamma2_tra = np.array([start2])
 
     # dyn_lambda = 6.74
     # dyn_lambda = 100
@@ -190,21 +137,21 @@ if __name__ == "__main__":
 
     for i in robot1.used_links:
         center_map = cent_agent1[f"link{i}"]
-        center_map = tra_map_forward(center_map, alpha2, T2, R2)
+        center_map = tra_map_forward(center_map, dmp_c.alpha2, dmp_c.T2, dmp_c.R2)
         axes_map = axes_agent1[f"link{i}"]
-        axes_map = alpha2 * axes_map
+        axes_map = dmp_c.alpha2 * axes_map
         Ellipsoid_dict_agent1[f"link{i}"] = sq_stat(center=center_map, axis=axes_map + axes_safe,
                                                     coeffs=np.array([1, 1, 1]), A=A, eta=eta)
 
         center_map = cent_agent2[f"link{i}"]
-        center_map = tra_map_forward(center_map, alpha1, T1, R1)
+        center_map = tra_map_forward(center_map, dmp_c.alpha1, dmp_c.T1, dmp_c.R1)
         axes_map = axes_agent1[f"link{i}"]
-        axes_map = alpha1 * axes_map
+        axes_map = dmp_c.alpha1 * axes_map
         Ellipsoid_dict_agent2[f"link{i}"] = sq_stat(center=center_map, axis=axes_map + axes_safe,
                                                     coeffs=np.array([1, 1, 1]), A=A, eta=eta)
 
-    Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2,
-                                                                    R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+    Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, dmp_c.alpha1, dmp_c.alpha2, dmp_c.T1, dmp_c.T2,
+                                                                    dmp_c.R1, dmp_c.R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
     plt.ion()
 
@@ -243,12 +190,12 @@ if __name__ == "__main__":
                 if (not flag_conv) and close_flag:
                     # apply potential field
                     print('ready to update agent1')
-                    MP.step(external_force=perturb_dynamic_agent1)
+                    dmp_c.MP.step(external_force=perturb_dynamic_agent1)
                     # flag_conv = np.linalg.norm(MP.x - MP.x_goal) < MP.tol
                     print('agent1 update')
 
                     # Map coordinations
-                    center_agent1_origin = tra_map_inverse(np.array(MP.x), alpha1, T1, R1)
+                    center_agent1_origin = tra_map_inverse(np.array(dmp_c.MP.x), dmp_c.alpha1, dmp_c.T1, dmp_c.R1)
 
                     # store trajecory in world map
                     gamma_tra = np.append(gamma_tra, np.array([center_agent1_origin]), axis=0)
@@ -272,16 +219,16 @@ if __name__ == "__main__":
                     desired_z[0].append(gamma_tra[-1][2])
                     measured_z[0].append(l[0][2])
 
-                    meas1 = tra_map_forward(np.array(l[0]), alpha1, T1, R1)
-                    flag_conv = np.linalg.norm(meas1 - MP.x_goal) < 0.05
+                    meas1 = tra_map_forward(np.array(l[0]), dmp_c.alpha1, dmp_c.T1, dmp_c.R1)
+                    flag_conv = np.linalg.norm(meas1 - dmp_c.MP.x_goal) < 0.05
 
-                    print("distance to goal MP1:", np.linalg.norm(meas1 - MP.x_goal))
+                    print("distance to goal MP1:", np.linalg.norm(meas1 - dmp_c.MP.x_goal))
 
                     # call the function to obtain data_dict_agent1
 
                     cent_agent1, axes_agent1, velo_agent1, rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2, velo_agent2, rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+                    Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, dmp_c.alpha1, dmp_c.alpha2, dmp_c.T1, dmp_c.T2, dmp_c.R1, dmp_c.R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
                     for i in range(1, num_links + 1):
                         key = f'link{i}'
@@ -299,12 +246,12 @@ if __name__ == "__main__":
                     r_s = 0.2
                     distance = np.linalg.norm(gamma_tra[-1] - gamma2_tra[-1])
                     distance = distance if distance < r_s else np.inf
-                    MP2.step(external_force=perturb_dynamic_agent2, distance=distance)
+                    dmp_c.MP2.step(external_force=perturb_dynamic_agent2, distance=distance)
 
                     print('agent2 update')
                     # flag_conv2 = np.linalg.norm(MP2.x - MP2.x_goal) < MP2.tol
                     # Map coordinations
-                    center_agent2_origin = tra_map_inverse(np.array(MP2.x), alpha2, T2, R2)
+                    center_agent2_origin = tra_map_inverse(np.array(dmp_c.MP2.x), dmp_c.alpha2, dmp_c.T2, dmp_c.R2)
 
                     # store trajecory in world map
                     gamma2_tra = np.append(gamma2_tra, np.array([center_agent2_origin]), axis=0)
@@ -328,15 +275,15 @@ if __name__ == "__main__":
                     desired_z[1].append(gamma2_tra[-1][2])
                     measured_z[1].append(l[0][2])
 
-                    meas2 = tra_map_forward(np.array(l[0]), alpha2, T2, R2)
-                    flag_conv2 = np.linalg.norm(meas2 - MP2.x_goal) < 0.05
-                    print("distance to goal MP2:", np.linalg.norm(meas2 - MP2.x_goal))
+                    meas2 = tra_map_forward(np.array(l[0]), dmp_c.alpha2, dmp_c.T2, dmp_c.R2)
+                    flag_conv2 = np.linalg.norm(meas2 - dmp_c.MP2.x_goal) < 0.05
+                    print("distance to goal MP2:", np.linalg.norm(meas2 - dmp_c.MP2.x_goal))
 
                     # call the function to obtain data_dict_agent1
 
                     cent_agent1, axes_agent1, velo_agent1, rotm_agent1 = getLinkFeatures(robot1)
                     cent_agent2, axes_agent2, velo_agent2, rotm_agent2 = getLinkFeatures(robot2)
-                    Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2, T1, T2, R1, R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
+                    # Ellipsoid_dict_agent1, Ellipsoid_dict_agent2 = Update_link_Data(cent_agent1, cent_agent2, dmp_c.alpha1, dmp_c.alpha2, dmp_c.T1, dmp_c.T2, dmp_c.R1, dmp_c.R2, Ellipsoid_dict_agent1, Ellipsoid_dict_agent2, num_links, robot1.used_links)  # , alpha1, alpha2, T1, T2, R1, R2)
 
                 time.sleep(0.01)
 
@@ -351,4 +298,4 @@ if __name__ == "__main__":
     # Create a 3D plot
     measured_xyz = [measured_x, measured_y, measured_z]
     desired_xyz = [measured_x, measured_y, measured_z]
-    gen_3d_plot2(plt, gamma, gamma2, measured_xyz, desired_xyz)
+    gen_3d_plot2(plt, dmp_c.gamma, dmp_c.gamma2, measured_xyz, desired_xyz)
