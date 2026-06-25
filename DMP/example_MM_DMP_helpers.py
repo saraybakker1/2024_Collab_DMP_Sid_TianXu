@@ -1,6 +1,5 @@
 from scipy.spatial.transform import Rotation as R
 import numpy as np
-from GlobalPoseDinova import getlink_global_pose, get_semiaxes_Constants
 from DMP_map_Rotation import rotation_matrix_from_vectors, tra_map_param, tra_map_forward, tra_map_inverse
 from example_MM_DMP_helpers_plot import *
 
@@ -10,6 +9,11 @@ def getLinkFeatures(robot, nr_links=9):
     Link_globalvel = {}
     Link_globalrot = {}
     Link_axes = {}
+
+    if robot.used_links[-1] == 8:
+        from GlobalPose import getlink_global_pose, get_semiaxes_Constants
+    else:
+        from GlobalPoseDinova import getlink_global_pose, get_semiaxes_Constants
 
     for l in robot.used_links:
     # for l in range(1, nr_links): #todo
@@ -76,7 +80,7 @@ def Update_link_Data(cent_agent1, cent_agent2, alpha1, alpha2,
                      num_links, used_links=None):
     if used_links is None:
         used_links = range(1, num_links + 1)
-    print('Arm Info Update')
+    # print('Arm Info Update')
     for i in used_links:
         key = f"link{i}"
 

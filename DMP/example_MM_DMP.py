@@ -90,11 +90,29 @@ if __name__ == "__main__":
     pb_state_start1 = robot1._getLinkState(robot1.end_effector_index)
     start1 = pb_state_start1[0]
     startorientation1 =  pb_state_start1[1] #todo: these orientations are very different from the ones computed with ds_collaboration, could be because of links, but maybe check.
-    end2 = [0.0, 1.5, 0.2]
+    end1 = [0.0, 1.5, start1[-1]]
     pb_state_start2 = robot2._getLinkState(robot2.end_effector_index)
     start2 = pb_state_start2[0]
     startorientation2 = pb_state_start2[1]
-    end1 = [0.5, -0.5, 0.2]
+    end2 = [0.5, -0.5, start2[-1]]
+
+    visual_shape_id = pb.createVisualShape(
+        shapeType=pb.GEOM_SPHERE,
+        radius=0.05,
+        rgbaColor=[1, 0, 0, 1]
+    )
+
+    goal_id1 = pb.createMultiBody(
+        baseMass=0,
+        baseVisualShapeIndex=visual_shape_id,
+        basePosition=end1
+    )
+
+    goal_id2 = pb.createMultiBody(
+        baseMass=0,
+        baseVisualShapeIndex=visual_shape_id,
+        basePosition=end2
+    )
 
     print('start1', start1)
     print('start2', start2)
@@ -124,8 +142,8 @@ if __name__ == "__main__":
     gamma2_, _, _, _ = MP2.rollout()
     t_des_ = np.linspace(0.0, 1.0, np.shape(gamma)[0])
 
-    print(gamma_[0], gamma_[-1])
-    print(gamma2_[0], gamma2_[-1])
+    # print(gamma_[0], gamma_[-1])
+    # print(gamma2_[0], gamma2_[-1])
     # pdb.set_trace()
 
     # Plot Ellipsoid (Need to be modified for better plot)
@@ -242,7 +260,7 @@ if __name__ == "__main__":
                     robot1._resetJointState(joint_angle)
                     pb.stepSimulation()
 
-                    print("Robot 1 -> ", gamma_tra[-1])
+                    # print("Robot 1 -> ", gamma_tra[-1])
                     l = robot1._getLinkState(robot1.end_effector_index)
 
                     desired_x[0].append(gamma_tra[-1][0])
@@ -257,7 +275,7 @@ if __name__ == "__main__":
                     meas1 = tra_map_forward(np.array(l[0]), alpha1, T1, R1)
                     flag_conv = np.linalg.norm(meas1 - MP.x_goal) < 0.05
 
-                    print(np.linalg.norm(meas1 - MP.x_goal))
+                    print("distance to goal MP1:", np.linalg.norm(meas1 - MP.x_goal))
 
                     # call the function to obtain data_dict_agent1
 
@@ -297,7 +315,7 @@ if __name__ == "__main__":
                     # robot2._sendPositionCommand(joint_angle)
                     robot2._resetJointState(joint_angle)
                     pb.stepSimulation()
-                    print("Robot 2 -> ", gamma2_tra[-1])
+                    # print("Robot 2 -> ", gamma2_tra[-1])
 
                     l = robot2._getLinkState(robot2.end_effector_index)
 
@@ -312,7 +330,7 @@ if __name__ == "__main__":
 
                     meas2 = tra_map_forward(np.array(l[0]), alpha2, T2, R2)
                     flag_conv2 = np.linalg.norm(meas2 - MP2.x_goal) < 0.05
-                    print(np.linalg.norm(meas2 - MP2.x_goal))
+                    print("distance to goal MP2:", np.linalg.norm(meas2 - MP2.x_goal))
 
                     # call the function to obtain data_dict_agent1
 
@@ -323,10 +341,10 @@ if __name__ == "__main__":
                 time.sleep(0.01)
 
                 if flag_conv:
-                    print("agent1 achieve goal")
+                    print("agent1 achieved goal")
 
                 if flag_conv2:
-                    print("agent2 achieve goal")
+                    print("agent2 achieved goal")
 
                 # plotresult(writer)
 

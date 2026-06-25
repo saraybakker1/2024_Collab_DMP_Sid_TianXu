@@ -206,7 +206,12 @@ class Dinova(RobotBase):
     return True
 
   def _calculateIK(self, pos, rot):
-    return pb.calculateInverseKinematics(self.id, self.end_effector_index, pos, rot)[:-8]
+    return pb.calculateInverseKinematics(self.id, self.end_effector_index, pos, rot,
+                                         lowerLimits=[-10, -10, -8, -1.38, -1.38, -1.38, -1.38, -1.38, -1.38],
+                                         upperLimits=[ 10,  10,  8,  1.38,  1.38,  1.38,  1.38,  1.38,  1.38],
+                                         jointRanges=[10, 10, 16, 4, 4, 4, 4, 4, 4],
+                                         jointDamping=[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+                                         restPoses=[0, 0, 0, 0., -0.2792,  1.308,  0.,  -1.047, 0.]) #[:-8]
 
   def _getGripperJointPosition(self):
     p1 = pb.getJointState(self.id, self.gripper_joint_indices[0])[0]

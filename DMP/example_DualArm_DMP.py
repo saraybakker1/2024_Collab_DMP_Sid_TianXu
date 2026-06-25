@@ -32,7 +32,7 @@ from Robot_Sim.robots.ur5_robotiq import UR5_Robotiq
 
 # number of links
 num_links = 7
-
+used_links = [1, 2, 3, 4, 5, 6, 7, 8]
 # Potential Field Dictionary
 Ellipsoid_dict_agent1 = {}
 Ellipsoid_dict_agent2 = {}
@@ -89,6 +89,24 @@ if __name__ == "__main__":
     end2 = [0.0, 0.5, 0.2]
     start2 = robot2._getLinkState(robot2.end_effector_index)[0]
     end1 = [0.5, 0.5, 0.2]
+
+    visual_shape_id = pb.createVisualShape(
+        shapeType=pb.GEOM_SPHERE,
+        radius=0.05,
+        rgbaColor=[1, 0, 0, 1]
+    )
+
+    goal_id1 = pb.createMultiBody(
+        baseMass=0,
+        baseVisualShapeIndex=visual_shape_id,
+        basePosition=end1
+    )
+
+    goal_id2 = pb.createMultiBody(
+        baseMass=0,
+        baseVisualShapeIndex=visual_shape_id,
+        basePosition=end2
+    )
 
     print('start1', start1)
     print('start2', start2)
