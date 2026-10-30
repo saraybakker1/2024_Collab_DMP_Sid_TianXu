@@ -15,7 +15,7 @@ rc('text', usetex=True)
 
 import pdb
 
-from dmp import dmp_cartesian
+from dmp import dmp as dmp_cartesian
 
 # DMP initialization
 num_ts = 300

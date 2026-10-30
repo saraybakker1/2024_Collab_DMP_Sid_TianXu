@@ -559,7 +559,7 @@ if __name__=="__main__":
     flag_conv2 = False
     total_time=0
 
-    pdb.set_trace()
+    pass  # pdb.set_trace()
 
     #Main while loop
     with imageio.get_writer('Controlled_alpha.gif', mode='I', fps=10) as writer:

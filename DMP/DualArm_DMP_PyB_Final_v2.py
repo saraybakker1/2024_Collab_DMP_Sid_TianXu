@@ -464,9 +464,9 @@ if __name__=="__main__":
     COLORS['orange'] = [1,0.5,0,1]
     COLORS['purple'] = [1,0,0.5,1]
     COLORS['pink'] = [0.49,0.2,0.2,1]
-    # box_id1 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.3, 0.0, 0.025))
-    # box_id2 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.3, 0.0, 0.075))
-    # box_id3 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.45, 0.45, 0.025))
+    # box_id1 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.3, 0.0, 0.025))
+    # box_id2 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.3, 0.0, 0.075))
+    # box_id3 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.45, 0.45, 0.025))
 
     # pb.changeVisualShape(box_id1, -1,-1, rgbaColor = COLORS['red'])
     # pb.changeVisualShape(box_id2, -1,-1, rgbaColor = COLORS['green'])
@@ -484,7 +484,7 @@ if __name__=="__main__":
     # pdb.set_trace()
     for pt in range(len(Traj1)):
         
-        pdb.set_trace()
+        pass  # pdb.set_trace()
         t_des = np.linspace(0.0, 1.0, 1000)
 
         '''
@@ -768,9 +768,9 @@ if __name__=="__main__":
                     # plotresult(writer)
         time.sleep(1.0)
         if pt == 0:
-            box_id1 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.3, 0.5, 0.025))
-            box_id2 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.3, -0.5, 0.025))
-            box_id3 = pb.loadURDF("Robot_Sim/urdf/object/box/box.urdf", (0.45, 0.45, 0.025))
+            box_id1 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.3, 0.5, 0.025))
+            box_id2 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.3, -0.5, 0.025))
+            box_id3 = pb.loadURDF(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Robot_Sim/urdf/object/box/box.urdf"), (0.45, 0.45, 0.025))
 
             pb.changeVisualShape(box_id1, -1,-1, rgbaColor = COLORS['red'])
             pb.changeVisualShape(box_id2, -1,-1, rgbaColor = COLORS['green'])

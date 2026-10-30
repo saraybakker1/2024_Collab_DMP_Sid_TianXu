@@ -1,4 +1,5 @@
 import os
+URDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'urdf')
 import copy
 import math
 import numpy as np
@@ -55,7 +56,7 @@ class Kuka(RobotBase):
   def initialize(self):
     ''''''
     # ur5_urdf_filepath = os.path.join(constants.URDF_PATH, 'kuka/kuka_with_gripper2.sdf')
-    ur5_urdf_filepath = "Robot_Sim/urdf/kuka/kuka_with_gripper2.sdf"
+    ur5_urdf_filepath = os.path.join(URDF_DIR, 'kuka/kuka_with_gripper2.sdf')
     pb.connect(pb.GUI)
     pb.setGravity(0, 0, -9.81)
 

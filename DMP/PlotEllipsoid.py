@@ -1,3 +1,18 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Example input: ellipsoid centers and semi-axis lengths, keyed by name
+centers = {
+    'link1': np.array([0.0, 0.0, 0.1]),
+    'link2': np.array([0.0, 0.0, 0.4]),
+    'link3': np.array([0.2, 0.0, 0.7]),
+}
+axes = {
+    'link1': np.array([0.075, 0.075, 0.08]),
+    'link2': np.array([0.075, 0.075, 0.21]),
+    'link3': np.array([0.07, 0.07, 0.2]),
+}
+
 
 
 def plot_ellipsoid(ax, center, axes_lengths):

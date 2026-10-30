@@ -104,16 +104,16 @@ def plot3d_(points):
 
 # Get global pose of each link
 def getLinkFeatures(robot):
-    Link_gloablpose = {}
-    Link_globalvel = {}
+    positions = []
+    orientations = []
+    Link_velocities = []
     for l in range(robot.num_joints):
-        LinkState = robot._getLinkStates(l)[0:2]
-        Pos = LinkState[0]
-        Ori = R.from_quat(LinkState[1])
-        Rotatation_matrix = Ori.as_matrix()
-        semi_axes_cons = get_semiaxes_Constants(f"Link{l}")
-        Link_gloablpose[f"Link{l}"] = [Pos, Rotatation_matrix, semi_axes_cons]
-        Link_globalvel[f"Link{l}"] = [robot._getLinkStates(l)[6]]
+        Link_states = robot._getLinkState(l)
+        positions.append(Link_states[0])
+        orientations.append(Link_states[1])
+        Link_velocities.append(Link_states[6])
+
+    Link_gloablpose, Link_globalvel = getlink_global_pose(positions, orientations, Link_velocities)
 
     return Link_gloablpose, Link_globalvel
 
@@ -457,7 +457,7 @@ if __name__=="__main__":
                 plot3d_2(gamma_)
 
                 plt.show()
-                pdb.set_trace()
+                pass  # pdb.set_trace()
 
 
 
@@ -556,4 +556,4 @@ if __name__=="__main__":
     # Show plot
     plt.show()
     print(total_time)
-    pdb.set_trace()
+    pass  # pdb.set_trace()

@@ -15,7 +15,7 @@ rc('text', usetex=True)
 
 import pdb
 
-from dmp import dmp_cartesian
+from dmp import dmp as dmp_cartesian
 from dmp import obstacle_superquadric
 from dmp import point_obstacle
 

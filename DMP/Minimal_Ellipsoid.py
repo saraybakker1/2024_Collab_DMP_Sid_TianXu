@@ -48,7 +48,9 @@ def find_minimum_volume_ellipsoid(points):
     # Optimization
     result = minimize(ellipsoid_volume, initial_guess, method='SLSQP', constraints=cons, bounds=bounds)
 
-    if result.success:
+    # SLSQP can stop with "Positive directional derivative for linesearch" at a
+    # usable optimum; accept the result as long as it still encloses all points
+    if result.success or min(ellipsoid_constraint(result.x, points)) >= -1e-4:
         a, b, c, cx, cy, cz = result.x
         return (cx, cy, cz), (a, b, c), result.fun
     else:

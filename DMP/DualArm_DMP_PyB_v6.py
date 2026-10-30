@@ -561,4 +561,4 @@ if __name__=="__main__":
     # Show plot
     plt.show()
     print(total_time)
-    pdb.set_trace()
+    pass  # pdb.set_trace()

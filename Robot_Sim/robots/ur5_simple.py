@@ -1,4 +1,5 @@
 import os
+URDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'urdf')
 import pybullet as pb
 from bulletarm.pybullet.utils import constants
 from bulletarm.pybullet.robots.robot_base import RobotBase
@@ -28,7 +29,7 @@ class UR5_Simple(RobotBase):
     pb.connect(pb.GUI)
     pb.setGravity(0, 0, -9.81)
 
-    ur5_urdf_filepath = 'Robot_Sim/urdf/ur5/ur5_simple_gripper.urdf'
+    ur5_urdf_filepath = os.path.join(URDF_DIR, 'ur5/ur5_simple_gripper.urdf')
     self.id = pb.loadURDF(ur5_urdf_filepath, [0,0,0], [0,0,0,1])
     self.gripper_closed = False
     self.holding_obj = None

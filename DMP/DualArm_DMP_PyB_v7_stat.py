@@ -338,7 +338,7 @@ def get_3d_plot2():
     # Adjust layout for better spacing
     plt.tight_layout()
     plt.show()
-    pdb.set_trace()
+    pass  # pdb.set_trace()
 
 def get_3d_plot():
     # Create a 3D figure
@@ -434,7 +434,7 @@ def get_3d_plot():
     # Adjust layout for better spacing
     plt.tight_layout()
     plt.show()
-    pdb.set_trace()
+    pass  # pdb.set_trace()
 
 if __name__=="__main__":
     pb.connect(pb.GUI)
@@ -711,11 +711,11 @@ if __name__=="__main__":
                 if not flag_conv2:
 
                     if total_time == 0.03:
-                        pdb.set_trace()
+                        pass  # pdb.set_trace()
                     elif total_time >= 0.3 and total_time <= 0.32:
-                        pdb.set_trace()
+                        pass  # pdb.set_trace()
                     elif total_time >= 0.6 and total_time <= 0.62:
-                        pdb.set_trace()
+                        pass  # pdb.set_trace()
                     # apply potential field
                     print('ready to update agent2')
                     MP2.step(external_force=perturb_dynamic_agent2)

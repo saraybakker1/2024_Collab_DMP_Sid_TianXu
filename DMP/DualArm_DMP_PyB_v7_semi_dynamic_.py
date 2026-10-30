@@ -264,7 +264,7 @@ if __name__=="__main__":
     print(gamma)
     print(gamma2)
 
-    pdb.set_trace()
+    pass  # pdb.set_trace()
 
     '''
     TODO: Make more examples of trajectories.
@@ -590,4 +590,4 @@ if __name__=="__main__":
     # Show plot
     plt.show()
     print(total_time)
-    pdb.set_trace()
+    pass  # pdb.set_trace()

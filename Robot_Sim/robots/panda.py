@@ -1,4 +1,5 @@
 import os
+URDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'urdf')
 import pybullet as pb
 from bulletarm.pybullet.utils import constants
 from bulletarm.pybullet.robots.robot_base import RobotBase
@@ -26,7 +27,7 @@ class Panda(RobotBase):
     pb.connect(pb.GUI)
     pb.setGravity(0, 0, -9.81)
 
-    urdf_filepath = 'Robot_Sim/urdf/franka_panda/panda.urdf'
+    urdf_filepath = os.path.join(URDF_DIR, 'franka_panda/panda.urdf')
     self.id = pb.loadURDF(urdf_filepath, useFixedBase=True)
     pb.resetBasePositionAndOrientation(self.id, [-0.1,0,0], [0,0,0,1])
 

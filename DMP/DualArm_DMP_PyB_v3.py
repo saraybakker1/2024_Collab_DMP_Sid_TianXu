@@ -31,13 +31,15 @@ from Robot_Sim.robots.ur5_robotiq import UR5_Robotiq
 def compute_collision_ellip(robot):
     positions = []
     orientations = []
-    for l in range(7):
-        Link_states = robot._getLinkState(l)[0:2]
+    velocities = []
+    for l in range(8):
+        Link_states = robot._getLinkState(l)
         positions.append(Link_states[0])
         orientations.append(Link_states[1])
-        print(Link_states)
+        velocities.append(Link_states[6])
+        print(Link_states[0:2])
     
-    Link_gloablpose = getlink_global_pose(positions, orientations)
+    Link_gloablpose, _ = getlink_global_pose(positions, orientations, velocities)
 
     return Link_gloablpose
 
@@ -416,4 +418,4 @@ if __name__=="__main__":
     # Show plot
     plt.show()
     print(total_time)
-    pdb.set_trace()
+    pass  # pdb.set_trace()

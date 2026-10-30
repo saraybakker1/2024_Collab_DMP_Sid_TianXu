@@ -18,7 +18,7 @@ import yaml
 import pdb
 from types import SimpleNamespace as SN
 
-from robots import ur5_robotiq
+from Robot_Sim.robots import ur5_robotiq
 
 def perturb_dynamic_agent1(x, v):
     out = agent1_obst_dynamic.gen_external_force(x, v-v_e)+\

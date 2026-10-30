@@ -471,7 +471,7 @@ if __name__=="__main__":
                     # plot3d_(gamma_)
 
                     plt.show()
-                    pdb.set_trace()
+                    pass  # pdb.set_trace()
 
 
 
@@ -570,4 +570,4 @@ if __name__=="__main__":
     # Show plot
     plt.show()
     print(total_time)
-    pdb.set_trace()
+    pass  # pdb.set_trace()

@@ -1,4 +1,5 @@
 import os
+URDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'urdf')
 import copy
 import math
 import numpy as np
@@ -73,7 +74,7 @@ class UR5_Robotiq(RobotBase):
     # pb.setGravity(0, 0, -9.81)
 
     # ur5_urdf_filepath = os.path.join(constants.URDF_PATH, 'ur5/ur5_robotiq_85_gripper_fake.urdf')
-    ur5_urdf_filepath = 'Robot_Sim/urdf/ur5/ur5_robotiq_85_gripper_fake.urdf'
+    ur5_urdf_filepath = os.path.join(URDF_DIR, 'ur5/ur5_robotiq_85_gripper_fake.urdf')
     self.id = pb.loadURDF(ur5_urdf_filepath, base_pos, base_ori,useFixedBase=True)
     # self.is_holding = False
     self.gripper_closed = False
